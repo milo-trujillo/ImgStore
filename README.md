@@ -14,3 +14,13 @@ require_relative 'ImgStore'
 ImgStore.encode("hello world!", "foo.png")
 ImgStore.decode(File.read("foo.png"), "decoded.txt")
 ```
+
+## Examples
+
+Here's an example ["hello world" audio file.](examples/example.wav)
+
+And here's that same wave file embedded in a PNG:
+
+![Encoded 'hello world' wav](examples/example.png)
+
+Provided is a test script ([examples/test.rb](examples/test.rb)) that will generate the PNG, then decode the PNG and recover a working wave file.
