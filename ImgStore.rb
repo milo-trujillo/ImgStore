@@ -6,7 +6,8 @@ module ImgStore
 	def ImgStore.encode(data, filename)
 		# First, figure out how many pixels we need.
 		# Remember that each pixel holds three bytes.
-		pixelsNeeded = (data.size / 3)
+		bytes = data.bytes
+		pixelsNeeded = (bytes.size / 3)
 		if( pixelsNeeded % 1 == 0 )
 			pixelsNeeded = pixelsNeeded.to_i
 		else
@@ -22,23 +23,26 @@ module ImgStore
 			size = root.to_i + 1
 		end
 
-		puts "Encoding image with size: #{size} (data is #{data.size} bytes)"
+		puts "Encoding image with size: #{size} (data is #{bytes.size} bytes)"
 		white = ChunkyPNG::Color.rgb(255, 255, 255)
 		image = ChunkyPNG::Image.new(size, size, white)
-		bytes = data.bytes
+		written = 0
 
 		for y in (0 .. (size-1))
 			for x in (0 .. (size-1))
 				c = [bytes.shift, bytes.shift, bytes.shift]
+				written += 3
 				for i in (0 .. 2)
 					if( c[i] == nil )
 						c[i] = 255
+						written -= 1
 					end
 				end
 				image[x,y] = ChunkyPNG::Color.rgb(c[0], c[1], c[2])
 			end
 		end
 
+		puts "Encoded #{written} bytes into #{filename}"
 		image.save(filename, :fast_rgb) # Save as RGB, not RGBA
 	end
 
@@ -54,6 +58,7 @@ module ImgStore
 
 		bytes = []
 		trailingNulls = 0
+		read = 0
 		
 		for y in (0 .. (image.height-1))
 			for x in (0 .. (image.width-1))
@@ -68,6 +73,7 @@ module ImgStore
 						trailingNulls = 0
 					end
 					bytes.push(byte)
+					read += 1
 				end
 			end
 		end	
@@ -82,5 +88,6 @@ module ImgStore
 				f.print(byte.chr)
 			end
 		f.close
+		puts "Decoded #{read} bytes and saved to #{filename}"
 	end
 end
