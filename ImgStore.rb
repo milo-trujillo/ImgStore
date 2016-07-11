@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'chunky_png'
+begin
+	require 'oily_png'
+rescue LoadError
+	require 'chunky_png'
+	puts 'oily_png gem not installed. Using pure chunky_png. This might be slow!'
+end
 
 module ImgStore
 	def ImgStore.encode(data, filename)
