@@ -8,6 +8,8 @@ rescue LoadError
 end
 
 module ImgStore
+	Debug = false # If enabled prints verbose output during encoding/decoding.
+
 	def ImgStore.encode(data, filename)
 		# First, figure out how many pixels we need.
 		# Remember that each pixel holds three bytes.
@@ -28,7 +30,9 @@ module ImgStore
 			size = root.to_i + 1
 		end
 
-		puts "Encoding image with size: #{size} (data is #{bytes.size} bytes)"
+		if( Debug )
+			puts "Encoding image with size: #{size} (data is #{bytes.size} bytes)"
+		end
 		white = ChunkyPNG::Color.rgb(255, 255, 255)
 		image = ChunkyPNG::Image.new(size, size, white)
 		written = 0
@@ -47,13 +51,15 @@ module ImgStore
 			end
 		end
 
-		puts "Encoded #{written} bytes into #{filename}"
+		if( Debug )
+			puts "Encoded #{written} bytes into #{filename}"
+		end
 		image.save(filename, :fast_rgb) # Save as RGB, not RGBA
 	end
 
 	def ImgStore.decode(data, filename)
 		image = ChunkyPNG::Image.from_blob(data)
-		if( image.width != image.height )
+		if( image.width != image.height and Debug )
 			puts("WARNING: Image is not square (not created by this program)"+
 				"but I'll try to decode it...")
 		elsif( image.palette.opaque? == false )
@@ -83,7 +89,7 @@ module ImgStore
 			end
 		end	
 
-		if( trailingNulls != 0 )
+		if( trailingNulls != 0 and Debug )
 			puts ("WARNING: #{filename} may have up to " +
 				"#{trailingNulls} extra null bytes")
 		end
@@ -93,6 +99,8 @@ module ImgStore
 				f.print(byte.chr)
 			end
 		f.close
-		puts "Decoded #{read} bytes and saved to #{filename}"
+		if( Debug )
+			puts "Decoded #{read} bytes and saved to #{filename}"
+		end
 	end
 end
